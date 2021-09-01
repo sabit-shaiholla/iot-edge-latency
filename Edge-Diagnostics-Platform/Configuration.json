@@ -1,0 +1,72 @@
+{
+  "modules": [
+    {"type": "ConsoleModule", "name": "console"},
+    {"type": "ScenarioModule", "name": "edge_lab", "path": "edge_lab.json"},
+    {"type": "UtilityModule", "name": "util"},
+    {
+      "type" : "RESTModule",
+      "name":  "rest",
+      "port": 4567,
+      "baseURL": "/rest",
+      "POST" : [
+        {"name" : "latency","URL": "/latency","command": "latency_report $step $timestamp","information":  ["step", "timestamp"]}
+      ],
+      "GET" : []
+    },
+
+    {"type" : "RemoteExecutionModule", "name": "remote"}
+  ],
+
+  "connections" : [
+
+    {
+      "in" : "rest.latency",
+      "out" : "console.out",
+      "commands" : {
+        "latency_report $step $timestamp" : "console $step $timestamp"
+      }
+    },
+    {
+      "in" : "rest.debug",
+      "out" : "console.out",
+      "commands" : {
+        "fromDebug $message" : "console $message"
+      }
+    },
+    {
+      "in" : "rest.latency",
+      "out" : "util.fileOut",
+      "commands" : {
+        "latency_report $step $timestamp" : "file_out append test.txt $step , $timestamp"
+      }
+    },
+    {
+      "in" : "console.in",
+      "out" : "util.control",
+      "commands" : {
+        "exit" : "util exit",
+        "pause $module" : "util pauseModule $module",
+        "resume $module" : "util resumeModule $module"
+      }
+    },
+    {
+      "in" : "console.in",
+      "out": "edge_lab.dispatcher",
+      "commands": {
+        "run_scenario" : "dispatcher run",
+        "pause_scenario" : "dispatcher pause",
+        "resume_scenario" : "dispatcher resume"
+      }
+    },
+
+    {
+      "in" : "edge_lab.scenario",
+      "out": "remote.ssh.out",
+      "commands" : {
+        "setup $HOST $PORT $USERNAME $PASSWORD" : "ssh setup $HOST $PORT $USERNAME $PASSWORD",
+        "send_server" : "ssh sendFile server.py ~/server.py",
+        "start_server" : "ssh execute -b python3 ~/server.py"
+      }
+    }
+  ]
+}

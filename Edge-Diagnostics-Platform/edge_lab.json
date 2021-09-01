@@ -1,0 +1,16 @@
+{
+  "eventList" : [
+    {
+      "command" : "setup 192.168.0.50 22 rover-lab esmlab",
+      "executionTime" : 1000
+    },
+    {
+      "command" : "send_server",
+      "executionTime" : 3000
+    },
+    {
+      "command" : "start_server",
+      "executionTime" : 5000
+    }
+  ]
+}
